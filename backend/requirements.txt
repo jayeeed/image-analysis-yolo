@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+ultralytics
+google-genai
+pyjwt
+bcrypt
+opencv-python-headless
+sqlalchemy
+python-dotenv
+python-jose[cryptography]
+pytest
+httpx

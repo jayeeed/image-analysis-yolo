@@ -1,0 +1,12 @@
+.venv
+node_modules
+.env
+.png
+*__pycache__
+*.pyc
+*.pt
+*.db
+.vscode
+frontend/.next/
+backend/uploads/
+.history/
