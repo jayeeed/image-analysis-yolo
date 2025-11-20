@@ -52,7 +52,7 @@ graph LR
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/jayeeed/image-analysis-yolo.git
    cd image-analysis-yolo
    ```
 
@@ -185,7 +185,7 @@ graph LR
 - Responsive design
 
 ### 4. AI Q&A
-- Gemini 2.5 Flash integration
+- Gemini 2.0 Flash with multi-modal implementation
 - Context includes detection data and image
 - Chat-style interface with message history
 
