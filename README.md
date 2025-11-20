@@ -2,6 +2,10 @@
 
 A full-stack AI web application for object detection using YOLO and conversational Q&A powered by Gemini 2.5 Flash.
 
+## Demo
+
+https://github.com/user-attachments/assets/bd9766af-77f3-40f5-8155-af7a4d52846c
+
 ## Features
 
 - **User Authentication**: Secure login/signup with JWT tokens and password hashing
