@@ -5,12 +5,19 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, Eye, EyeOff, CheckSquare, MessageCircle, Grid } from 'lucide-react';
 import axios from 'axios';
 
+interface AuthData {
+    email: string;
+    password: string;
+    name: string;
+    confirmPassword: string;
+}
+
 export default function LoginPage() {
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const [formData, setFormData] = useState({
+    const [authData, setAuthData] = useState<AuthData>({
         email: '',
         password: '',
         name: '',
@@ -22,7 +29,7 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
 
-        if (!isLogin && formData.password !== formData.confirmPassword) {
+        if (!isLogin && authData.password !== authData.confirmPassword) {
             setError('Passwords do not match');
             return;
         }
@@ -31,12 +38,9 @@ export default function LoginPage() {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
             if (isLogin) {
-                const loginFormData = new URLSearchParams();
-                loginFormData.append('username', formData.email);
-                loginFormData.append('password', formData.password);
-
-                const response = await axios.post(`${apiUrl}/api/auth/login`, loginFormData, {
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                const response = await axios.post(`${apiUrl}/api/auth/login`, {
+                    email: authData.email,
+                    password: authData.password
                 });
 
                 if (response.data.access_token) {
@@ -44,19 +48,15 @@ export default function LoginPage() {
                     router.push('/dashboard');
                 }
             } else {
-                const signupFormData = new FormData();
-                signupFormData.append('email', formData.email);
-                signupFormData.append('password', formData.password);
-                signupFormData.append('full_name', formData.name);
+                await axios.post(`${apiUrl}/api/auth/signup`, {
+                    email: authData.email,
+                    password: authData.password,
+                    full_name: authData.name
+                });
 
-                await axios.post(`${apiUrl}/api/auth/signup`, signupFormData);
-
-                const loginFormData = new URLSearchParams();
-                loginFormData.append('username', formData.email);
-                loginFormData.append('password', formData.password);
-
-                const loginResponse = await axios.post(`${apiUrl}/api/auth/login`, loginFormData, {
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                const loginResponse = await axios.post(`${apiUrl}/api/auth/login`, {
+                    email: authData.email,
+                    password: authData.password
                 });
 
                 if (loginResponse.data.access_token) {
@@ -167,8 +167,8 @@ export default function LoginPage() {
                                     <User className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-[#94a3b8]" />
                                     <input
                                         type="text"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        value={authData.name}
+                                        onChange={(e) => setAuthData({ ...authData, name: e.target.value })}
                                         placeholder="John Doe"
                                         className="w-full py-3 sm:py-3.5 px-3 sm:px-4 pl-10 sm:pl-12 border-[1.5px] border-[#e2e8f0] rounded-[10px] text-sm sm:text-[15px] transition-all focus:outline-none focus:border-[#2563eb] focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]"
                                         required={!isLogin}
@@ -183,8 +183,8 @@ export default function LoginPage() {
                                 <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-[#94a3b8]" />
                                 <input
                                     type="email"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    value={authData.email}
+                                    onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
                                     placeholder="you@example.com"
                                     className="w-full py-3 sm:py-3.5 px-3 sm:px-4 pl-10 sm:pl-12 border-[1.5px] border-[#e2e8f0] rounded-[10px] text-sm sm:text-[15px] transition-all focus:outline-none focus:border-[#2563eb] focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]"
                                     required
@@ -198,8 +198,8 @@ export default function LoginPage() {
                                 <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-[#94a3b8]" />
                                 <input
                                     type={showPassword ? 'text' : 'password'}
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    value={authData.password}
+                                    onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
                                     placeholder={isLogin ? 'Enter your password' : 'Create a password'}
                                     className="w-full py-3 sm:py-3.5 px-3 sm:px-4 pl-10 sm:pl-12 pr-10 sm:pr-12 border-[1.5px] border-[#e2e8f0] rounded-[10px] text-sm sm:text-[15px] transition-all focus:outline-none focus:border-[#2563eb] focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]"
                                     required
@@ -221,8 +221,8 @@ export default function LoginPage() {
                                     <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-[#94a3b8]" />
                                     <input
                                         type={showConfirmPassword ? 'text' : 'password'}
-                                        value={formData.confirmPassword}
-                                        onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                                        value={authData.confirmPassword}
+                                        onChange={(e) => setAuthData({ ...authData, confirmPassword: e.target.value })}
                                         placeholder="Confirm your password"
                                         className="w-full py-3 sm:py-3.5 px-3 sm:px-4 pl-10 sm:pl-12 pr-10 sm:pr-12 border-[1.5px] border-[#e2e8f0] rounded-[10px] text-sm sm:text-[15px] transition-all focus:outline-none focus:border-[#2563eb] focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]"
                                         required={!isLogin}

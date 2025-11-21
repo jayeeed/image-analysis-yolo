@@ -124,14 +124,13 @@ export default function Dashboard() {
 
         try {
             const token = localStorage.getItem('token');
-
-            const formData = new FormData();
-            formData.append('question', currentQuestion);
-            formData.append('image_id', imageId.toString());
-
+            
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/chat`,
-                formData,
+                {
+                    question: currentQuestion,
+                    image_id: imageId
+                },
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
@@ -377,7 +376,7 @@ export default function Dashboard() {
                             </div>
                             <div>
                                 <h3 className="text-base sm:text-[17px] font-bold text-[#0f172a] tracking-tight">Ask Questions About Results</h3>
-                                <p className="text-xs sm:text-sm text-[#64748b]">Powered by Gemini 2.5 Flash</p>
+                                <p className="text-xs sm:text-sm text-[#64748b]">Powered by Gemini</p>
                             </div>
                         </div>
 

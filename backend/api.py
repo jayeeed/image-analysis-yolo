@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import shutil
@@ -8,6 +7,7 @@ import uuid
 import base64
 
 from models import get_db, User, Image, DetectionResult
+from schemas import UserLogin, UserSignup, ChatRequest
 from auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
@@ -26,10 +26,10 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/auth/login")
 async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    request: UserLogin, db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.hashed_password):
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user or not verify_password(request.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -44,17 +44,15 @@ async def login_for_access_token(
 
 @router.post("/auth/signup")
 async def signup(
-    email: str = Form(...),
-    password: str = Form(...),
-    full_name: str = Form(...),
+    request: UserSignup,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == request.email).first()
     if user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    hashed_password = get_password_hash(password)
-    new_user = User(email=email, hashed_password=hashed_password, full_name=full_name)
+    hashed_password = get_password_hash(request.password)
+    new_user = User(email=request.email, hashed_password=hashed_password, full_name=request.full_name)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -109,14 +107,13 @@ async def detect_objects(
 
 @router.post("/chat")
 async def chat_about_image(
-    question: str = Form(...),
-    image_id: int = Form(...),
+    request: ChatRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     image = (
         db.query(Image)
-        .filter(Image.id == image_id, Image.owner_id == current_user.id)
+        .filter(Image.id == request.image_id, Image.owner_id == current_user.id)
         .first()
     )
     if not image:
@@ -131,5 +128,5 @@ async def chat_about_image(
     with open(image.filepath, "rb") as f:
         image_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-    response = ask_gemini(question, detections, image_b64)
+    response = ask_gemini(request.question, detections, image_b64)
     return {"response": response}

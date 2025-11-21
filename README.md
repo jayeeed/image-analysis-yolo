@@ -1,6 +1,6 @@
 # AI Image Analysis & Q&A Platform
 
-A full-stack AI web application for object detection using YOLO and conversational Q&A powered by Gemini 2.5 Flash.
+A full-stack AI web application for object detection using YOLO and conversational Q&A powered by Gemini.
 
 ## Demo
 
@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/bd9766af-77f3-40f5-8155-af7a4d52846c
 - **User Authentication**: Secure login/signup with JWT tokens and password hashing
 - **Image Upload & Object Detection**: Upload images and detect objects using YOLO12x model
 - **Results Visualization**: View annotated images with bounding boxes and sortable detection tables
-- **AI-Powered Q&A**: Ask questions about detected objects using Gemini 2.5 Flash
+- **AI-Powered Q&A**: Ask questions about detected objects using Gemini 2.0 Flash
 - **Responsive Design**: Mobile-friendly UI that matches the provided design specifications
 
 ## Tech Stack
@@ -27,20 +27,57 @@ https://github.com/user-attachments/assets/bd9766af-77f3-40f5-8155-af7a4d52846c
 - **FastAPI** - Modern Python web framework
 - **SQLAlchemy** - ORM for database operations
 - **JWT** - Secure authentication
-- **Ultralytics YOLO** - Object detection model
-- **Google Gemini** - AI-powered conversational assistant
+- **Ultralytics YOLO** - Object detection model yolo12x
+- **Google Gemini** - AI-powered conversational assistant using gemini-2.0-flash
 
 ### Database
 - **SQLite** - Lightweight database (can be replaced with PostgreSQL for production)
 
 ## Architecture
+
 ```mermaid
-graph LR
-    Frontend[Next.js] -->|HTTP| Backend[FastAPI]
-    Backend -->|SQL| Database[SQLite]
-    Backend -->|YOLO Model| ObjectDetection
-    Backend -->|Gemini API| Q&A
+graph TB
+    subgraph "Client Layer"
+        User([User])
+        Browser[Next.js Frontend]
+    end
+    
+    subgraph "Application Layer"
+        API[FastAPI Backend]
+        Auth[JWT Authentication]
+        Detection[Image Detection Service]
+        Chat[Chat Service]
+    end
+    
+    subgraph "Data Layer"
+        DB[(SQLite Database)]
+        YOLO[YOLO12x Model]
+        Gemini[Gemini API]
+        Storage[File Storage]
+    end
+    
+    User -->|Login/Signup| Browser
+    User -->|Upload Image| Browser
+    User -->|Ask Questions| Browser
+    
+    Browser -->|API Requests| API
+    
+    API -->|Authenticate| Auth
+    API -->|Process Image| Detection
+    API -->|Q&A Query| Chat
+    
+    Auth -->|Store/Verify Users| DB
+    Detection -->|Run Inference| YOLO
+    Detection -->|Save Images| Storage
+    Detection -->|Save Results| DB
+    Chat -->|Generate Response| Gemini
 ```
+
+### Workflow
+1. **Authentication**: Users sign up/login → JWT token issued → Token stored in browser
+2. **Image Analysis**: Upload image → YOLO detection → Annotated image + results stored
+3. **AI Chat**: Ask questions → Gemini processes with image context → Response displayed
+4. **Data Persistence**: All user data, images, and results stored in SQLite database
 
 ## Prerequisites
 
@@ -131,21 +168,31 @@ graph LR
 
 ### Authentication
 - `POST /api/auth/signup` - Create new user account
+  - **Body**: `email`, `password`, `full_name`
 - `POST /api/auth/login` - Login and receive JWT token
+  - **Body**: `email`, `password`
 - `GET /api/auth/me` - Get current user info (requires auth)
 
 ### Object Detection
 - `POST /api/detect` - Upload image and get detection results (requires auth)
-  - Returns: annotated image and detection data
+  - **Input**: `file` (Multipart/Form-Data image file)
+  - **Return**:
+    - `image_id`: ID of the stored image
+    - `annotated_image`: Base64 encoded JPEG with bounding boxes
+    - `detections`: Array of objects containing `class_name`, `confidence`, and `bbox`
 
 ### Q&A
 - `POST /api/chat` - Ask questions about detection results (requires auth)
-  - Body: `{ question, detections, image_url }`
+  - **Body**: 
+    - `question`: Text question about the image
+    - `image_id`: ID of the image to reference
+  - **Return**:
+    - `response`: AI generated answer based on the image and detections
 
 ## Project Structure
 
 ```
-.
+image-analysis-yolo/
 ├── backend/
 │   ├── main.py            # FastAPI app entry point
 │   ├── auth.py            # JWT authentication logic
