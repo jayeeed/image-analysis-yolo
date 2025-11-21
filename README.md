@@ -1,4 +1,4 @@
-# AI Image Analysis & Q&A Platform
+# AI Image Analysis Application
 
 A full-stack AI web application for object detection using YOLO and conversational Q&A powered by Gemini.
 
@@ -31,7 +31,7 @@ https://github.com/user-attachments/assets/bd9766af-77f3-40f5-8155-af7a4d52846c
 - **Google Gemini** - AI-powered conversational assistant using gemini-2.0-flash
 
 ### Database
-- **SQLite** - Lightweight database (can be replaced with PostgreSQL for production)
+- **SQLite** - Lightweight database (can be replaced with PostgreSQL or other relational database for production)
 
 ## Architecture
 
@@ -194,24 +194,32 @@ graph TB
 ```
 image-analysis-yolo/
 ├── backend/
-│   ├── main.py            # FastAPI app entry point
-│   ├── auth.py            # JWT authentication logic
-│   ├── detection.py       # YOLO inference service
-│   ├── chat.py            # Gemini integration
-│   ├── models.py          # Database models
-│   ├── requirements.txt   # Python dependencies
-│   └── Dockerfile         # Backend container
+│   ├── main.py               # FastAPI app entry point
+│   ├── auth.py               # JWT authentication logic
+│   ├── detection.py          # YOLO inference service
+│   ├── chat.py               # Gemini integration
+│   ├── models.py             # Database models
+│   ├── schemas.py            # Pydantic models for API validation
+│   ├── requirements.txt      # Python dependencies
+│   └── Dockerfile            # Backend container
+│   └── .env                  # Environment variables
 ├── frontend/
 │   ├── src/
 │   │   └── app/
-│   │       ├── login/     # Login/signup page
-│   │       ├── dashboard/ # Main application
-│   │       ├── layout.tsx # Shared layout
-│   │       └── page.tsx   # Root redirect
-│   ├── package.json       # Node dependencies
-│   └── Dockerfile         # Frontend container
-├── docker-compose.yml     # Service orchestration
-└── README.md              # This file
+│   │       ├── login/        # Login page
+│   │       |   └── page.tsx  # Login page
+│   │       ├── signup/       # Signup page
+│   │       |   └── page.tsx  # Signup page
+│   │       ├── dashboard/    # Dashboard page
+│   │       |   └── page.tsx  # Dashboard page
+│   │       ├── layout.tsx    # Shared layout
+│   │       └── page.tsx      # Root redirect
+│   ├── package.json          # Node dependencies
+│   └── Dockerfile            # Frontend container
+│   └── .env                  # Environment variables
+├── docker-compose.yml        # Service orchestration
+├── .gitignore                # Git ignore file
+└── README.md                 # This file
 ```
 
 ## Key Features Implementation
